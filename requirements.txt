@@ -1,0 +1,32 @@
+# 测试框架
+pytest==7.4.0
+pytest-html==3.1.1
+allure-pytest==2.13.2
+pytest-xdist==3.3.1
+pytest-rerunfailures==16.3
+
+# Web测试
+playwright==1.39.0
+
+# API测试
+requests==2.31.0
+
+# 数据处理
+pydantic==2.4.2
+pydantic-settings==2.0.3
+pyyaml==6.0.1
+
+# 数据库
+pymysql==1.0.3
+# psycopg2-binary==2.9.9  # 需要PostgreSQL环境
+
+# 工具库
+python-dotenv==1.0.0
+cryptography==41.0.4
+
+# 性能测试
+locust==2.20.0
+
+# 安全测试
+bandit==1.7.5
+safety==2.3.1

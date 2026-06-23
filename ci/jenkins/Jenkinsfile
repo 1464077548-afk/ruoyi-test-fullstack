@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Setup') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+        
+        stage('Smoke Test') {
+            steps {
+                sh 'pytest -m smoke'
+            }
+        }
+        
+        stage('API Test') {
+            steps {
+                sh 'pytest -m api'
+            }
+        }
+        
+        stage('UI Test') {
+            steps {
+                sh 'pytest -m ui'
+            }
+        }
+        
+        stage('Performance Test') {
+            steps {
+                sh 'pytest -m performance'
+            }
+        }
+        
+        stage('Security Test') {
+            steps {
+                sh 'pytest -m security'
+            }
+        }
+    }
+    
+    post {
+        always {
+            junit 'reports/**/*.xml'
+            archiveArtifacts artifacts: 'reports/**/*', fingerprint: true
+        }
+    }
+}

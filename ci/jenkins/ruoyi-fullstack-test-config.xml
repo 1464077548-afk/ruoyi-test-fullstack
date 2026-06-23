@@ -1,0 +1,299 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2148.v0918d3a_b_f3c46">
+      <stagesOrder>UP</stagesOrder>
+      <colorsTEnabled>true</colorsTEnabled>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction>
+  </actions>
+  <description>RuoYi全栈自动化测试Pipeline任务 - 支持代码变更触发和每日凌晨定时构建</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <artifactDiscarder class="hudson.tasks.LogRotator">
+        <daysToKeepStr>30</daysToKeepStr>
+        <numToKeepStr>50</numToKeepStr>
+        <artifactDaysToKeepStr>7</artifactDaysToKeepStr>
+        <artifactNumToKeepStr>10</artifactNumToKeepStr>
+      </artifactDiscarder>
+    </jenkins.model.BuildDiscarderProperty>
+    <jenkins.plugins.cola.cola.BuildTimeoutWrapper>
+      <timeoutMinutes>120</timeoutMinutes>
+    </jenkins.plugins.cola.cola.BuildTimeoutWrapper>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <hudson.triggers.SCMTrigger>
+          <spec>H/15 * * * *</spec>
+          <ignorePostCommitHooks>false</ignorePostCommitHooks>
+        </hudson.triggers.SCMTrigger>
+        <hudson.triggers.TimerTrigger>
+          <spec>0 0 * * *</spec>
+        </hudson.triggers.TimerTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@5.2.2">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>E:/ruoyi-ui/ruoyi_fullstack_test</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>refs/heads/main</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+  </scm>
+  <definition class="org.jenkinsci.plugins.pipeline.modeldefinition.directive.DeclarativePipeline" plugin="pipeline-model-definition@2.2148.v0918d3a_b_f3c46">
+    <script>
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_REGISTRY = 'docker.io'
+        PROJECT_NAME = 'ruoyi-fullstack-test'
+        BUILD_NUMBER = env.BUILD_NUMBER
+        TEST_REPORTS = 'reports/'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+    
+    options {
+        buildDiscarder(logRotator(
+            daysToKeepStr: '30',
+            numToKeepStr: '50',
+            artifactDaysToKeepStr: '7',
+            artifactNumToKeepStr: '10'
+        ))
+        timeout(time: 2, unit: 'HOURS')
+        timestamps()
+        ansiColor('xterm')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '========================================'
+                echo 'Stage 1: 代码检出'
+                echo '========================================'
+                checkout scm
+                sh 'git log --oneline -3'
+            }
+        }
+        
+        stage('Build Backend') {
+            steps {
+                echo '========================================'
+                echo 'Stage 2: 构建后端应用'
+                echo '========================================'
+                dir('../RuoYi-Vue') {
+                    sh 'mvn clean package -DskipTests -q'
+                }
+            }
+        }
+        
+        stage('Build Frontend') {
+            steps {
+                echo '========================================'
+                echo 'Stage 3: 构建前端应用'
+                echo '========================================'
+                dir('../RuoYi-Vue/ruoyi-ui') {
+                    sh 'npm install --production'
+                    sh 'npm run build:prod'
+                }
+            }
+        }
+        
+        stage('Build Docker Images') {
+            steps {
+                echo '========================================'
+                echo 'Stage 4: 构建Docker镜像'
+                echo '========================================'
+                sh 'docker-compose build'
+            }
+        }
+        
+        stage('Start Services') {
+            steps {
+                echo '========================================'
+                echo 'Stage 5: 启动测试环境服务'
+                echo '========================================'
+                sh 'docker-compose up -d'
+                sh 'sleep 180'
+            }
+        }
+        
+        stage('Health Check') {
+            steps {
+                echo '========================================'
+                echo 'Stage 6: 服务健康检查'
+                echo '========================================'
+                script {
+                    def maxRetries = 10
+                    def retryCount = 0
+                    def adminHealthy = false
+                    
+                    while (retryCount < maxRetries && !adminHealthy) {
+                        try {
+                            sh 'curl -f http://localhost:8080/api/system/user/getInfo'
+                            adminHealthy = true
+                        } catch (Exception e) {
+                            retryCount++
+                            echo "服务健康检查失败，重试第 ${retryCount}/${maxRetries} 次"
+                            sh 'sleep 30'
+                        }
+                    }
+                    
+                    if (!adminHealthy) {
+                        error '服务启动超时'
+                    }
+                }
+            }
+        }
+        
+        stage('Smoke Test') {
+            steps {
+                echo '========================================'
+                echo 'Stage 7: 冒烟测试'
+                echo '========================================'
+                sh 'docker exec ruoyi-test-runner pytest -m smoke -v --tb=short --html=reports/html/smoke_report.html --self-contained-html'
+            }
+            post {
+                always {
+                    junit 'reports/junit/*smoke*.xml'
+                    archiveArtifacts artifacts: 'reports/html/smoke_report.html', fingerprint: true
+                }
+            }
+        }
+        
+        stage('API Test') {
+            steps {
+                echo '========================================'
+                echo 'Stage 8: API接口测试'
+                echo '========================================'
+                sh 'docker exec ruoyi-test-runner pytest -m api -v --tb=short --html=reports/html/api_report.html --self-contained-html -n auto'
+            }
+            post {
+                always {
+                    junit 'reports/junit/*api*.xml'
+                    archiveArtifacts artifacts: 'reports/html/api_report.html', fingerprint: true
+                }
+            }
+        }
+        
+        stage('UI Test') {
+            steps {
+                echo '========================================'
+                echo 'Stage 9: UI自动化测试'
+                echo '========================================'
+                sh 'docker exec ruoyi-test-runner pytest -m ui -v --tb=short --html=reports/html/ui_report.html --self-contained-html -n auto'
+            }
+            post {
+                always {
+                    junit 'reports/junit/*ui*.xml'
+                    archiveArtifacts artifacts: 'reports/html/ui_report.html', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Integration Test') {
+            steps {
+                echo '========================================'
+                echo 'Stage 10: 集成测试'
+                echo '========================================'
+                sh 'docker exec ruoyi-test-runner pytest -m integration -v --tb=short --html=reports/html/integration_report.html --self-contained-html'
+            }
+            post {
+                always {
+                    junit 'reports/junit/*integration*.xml'
+                    archiveArtifacts artifacts: 'reports/html/integration_report.html', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Performance Test') {
+            steps {
+                echo '========================================'
+                echo 'Stage 11: 性能测试'
+                echo '========================================'
+                sh 'docker exec ruoyi-test-runner pytest -m performance -v --tb=short --html=reports/html/performance_report.html --self-contained-html'
+            }
+            post {
+                always {
+                    junit 'reports/junit/*performance*.xml'
+                    archiveArtifacts artifacts: 'reports/html/performance_report.html', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Security Test') {
+            steps {
+                echo '========================================'
+                echo 'Stage 12: 安全测试'
+                echo '========================================'
+                sh 'docker exec ruoyi-test-runner pytest -m security -v --tb=short --html=reports/html/security_report.html --self-contained-html'
+            }
+            post {
+                always {
+                    junit 'reports/junit/*security*.xml'
+                    archiveArtifacts artifacts: 'reports/html/security_report.html', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Stop Services') {
+            steps {
+                echo '========================================'
+                echo 'Stage 13: 停止服务'
+                echo '========================================'
+                sh 'docker-compose down'
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo '========================================'
+            echo 'Post Build: 归档测试报告'
+            echo '========================================'
+            archiveArtifacts artifacts: 'reports/**/*', fingerprint: true
+            junit 'reports/junit/**/*.xml'
+            
+            emailext attachLog: true,
+                body: """
+                构建完成: ${BUILD_NUMBER}
+                状态: ${currentBuild.currentResult}
+                
+                测试报告:
+                - HTML报告: <a href="${BUILD_URL}artifact/reports/html/report.html">点击查看</a>
+                - JUnit报告: <a href="${BUILD_URL}testReport">点击查看</a>
+                
+                构建时间: ${currentBuild.durationString}
+                """,
+                subject: "[${currentBuild.currentResult}] RuoYi全栈测试构建 #${BUILD_NUMBER}",
+                to: 'test@example.com'
+        }
+        
+        success {
+            echo '构建成功!'
+        }
+        
+        failure {
+            echo '构建失败!'
+        }
+    }
+}
+    </script>
+    <attributes/>
+  </definition>
+  <triggers>
+    <hudson.triggers.SCMTrigger>
+      <spec>H/15 * * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+    <hudson.triggers.TimerTrigger>
+      <spec>0 0 * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <disabled>false</disabled>
+</flow-definition>

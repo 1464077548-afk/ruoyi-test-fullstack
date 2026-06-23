@@ -1,0 +1,177 @@
+# API 规范定义
+
+api:
+  # 认证接口
+  auth:
+    login:
+      method: POST
+      path: /login
+      headers:
+        Content-Type: application/json
+      body:
+        username: string
+        password: string
+      response:
+        code: integer
+        message: string
+        token: string
+    logout:
+      method: POST
+      path: /logout
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string
+  
+  # 用户接口
+  user:
+    list:
+      method: GET
+      path: /system/user/list
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string
+        rows: array
+    create:
+      method: POST
+      path: /system/user
+      headers:
+        Authorization: Bearer {token}
+        Content-Type: application/json
+      body:
+        userName: string
+        nickName: string
+        password: string
+        deptId: integer
+        phonenumber: string
+        email: string
+      response:
+        code: integer
+        message: string
+    update:
+      method: PUT
+      path: /system/user/{id}
+      headers:
+        Authorization: Bearer {token}
+        Content-Type: application/json
+      body:
+        userId: integer
+        nickName: string
+      response:
+        code: integer
+        message: string
+    delete:
+      method: DELETE
+      path: /system/user/{id}
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string
+  
+  # 角色接口
+  role:
+    list:
+      method: GET
+      path: /system/role/list
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string
+        rows: array
+    create:
+      method: POST
+      path: /system/role
+      headers:
+        Authorization: Bearer {token}
+        Content-Type: application/json
+      body:
+        roleName: string
+        roleKey: string
+        roleSort: integer
+        status: string
+        menuIds: array
+      response:
+        code: integer
+        message: string
+    update:
+      method: PUT
+      path: /system/role/{id}
+      headers:
+        Authorization: Bearer {token}
+        Content-Type: application/json
+      body:
+        roleId: integer
+        roleName: string
+      response:
+        code: integer
+        message: string
+    delete:
+      method: DELETE
+      path: /system/role/{id}
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string
+  
+  # 菜单接口
+  menu:
+    list:
+      method: GET
+      path: /system/menu/list
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string
+        data: array
+    routes:
+      method: GET
+      path: /system/menu/routes
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string
+        data: array
+    create:
+      method: POST
+      path: /system/menu
+      headers:
+        Authorization: Bearer {token}
+        Content-Type: application/json
+      body:
+        menuName: string
+        parentId: integer
+        orderNum: integer
+        path: string
+        component: string
+        menuType: string
+      response:
+        code: integer
+        message: string
+    update:
+      method: PUT
+      path: /system/menu/{id}
+      headers:
+        Authorization: Bearer {token}
+        Content-Type: application/json
+      body:
+        menuId: integer
+        menuName: string
+      response:
+        code: integer
+        message: string
+    delete:
+      method: DELETE
+      path: /system/menu/{id}
+      headers:
+        Authorization: Bearer {token}
+      response:
+        code: integer
+        message: string

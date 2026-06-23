@@ -1,0 +1,124 @@
+pipeline {
+    agent any
+    
+    environment {
+        TEST_DIR = 'E:/ruoyi-ui/ruoyi_fullstack_test'
+        REPORTS_DIR = 'reports'
+    }
+    
+    triggers {
+        pollSCM('H/15 * * * *')
+        cron('0 0 * * *')
+    }
+    
+    options {
+        buildDiscarder(logRotator(
+            daysToKeepStr: '30',
+            numToKeepStr: '50',
+            artifactDaysToKeepStr: '7',
+            artifactNumToKeepStr: '10'
+        ))
+        timeout(time: 2, unit: 'HOURS')
+        timestamps()
+    }
+    
+    stages {
+        stage('Prepare') {
+            steps {
+                echo '========================================'
+                echo 'Stage 1: 准备测试环境'
+                echo '========================================'
+                bat "xcopy /E /I /Y \"${TEST_DIR}\" \"%WORKSPACE%\""
+            }
+        }
+        
+        stage('Build Docker Images') {
+            steps {
+                echo '========================================'
+                echo 'Stage 2: 构建Docker镜像'
+                echo '========================================'
+                bat 'docker-compose build'
+            }
+        }
+        
+        stage('Start Services') {
+            steps {
+                echo '========================================'
+                echo 'Stage 3: 启动测试环境服务'
+                echo '========================================'
+                bat 'docker-compose up -d'
+                bat 'timeout /t 180 /nobreak'
+            }
+        }
+        
+        stage('Health Check') {
+            steps {
+                echo '========================================'
+                echo 'Stage 4: 服务健康检查'
+                echo '========================================'
+                script {
+                    def maxRetries = 10
+                    def retryCount = 0
+                    def adminHealthy = false
+                    
+                    while (retryCount < maxRetries && !adminHealthy) {
+                        try {
+                            bat 'curl -f http://localhost:8080/api/system/user/getInfo'
+                            adminHealthy = true
+                        } catch (Exception e) {
+                            retryCount++
+                            echo "服务健康检查失败，重试第 ${retryCount}/${maxRetries} 次"
+                            bat 'timeout /t 30 /nobreak'
+                        }
+                    }
+                    
+                    if (!adminHealthy) {
+                        error '服务启动超时'
+                    }
+                }
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                echo '========================================'
+                echo 'Stage 5: 执行自动化测试'
+                echo '========================================'
+                bat 'docker exec ruoyi-test-runner pytest -v --tb=short --html=reports/html/report.html --self-contained-html'
+            }
+            post {
+                always {
+                    junit 'reports/junit/**/*.xml'
+                    archiveArtifacts artifacts: 'reports/**/*', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Stop Services') {
+            steps {
+                echo '========================================'
+                echo 'Stage 6: 停止服务'
+                echo '========================================'
+                bat 'docker-compose down'
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo '========================================'
+            echo 'Post Build: 归档测试报告'
+            echo '========================================'
+            archiveArtifacts artifacts: 'reports/**/*', fingerprint: true
+            junit 'reports/junit/**/*.xml'
+        }
+        
+        success {
+            echo '构建成功!'
+        }
+        
+        failure {
+            echo '构建失败!'
+        }
+    }
+}

@@ -1,0 +1,34 @@
+# 多环境配置
+
+environments:
+  # 开发环境
+  development:
+    base_url: http://localhost:8080
+    username: admin
+    password: admin123
+    browser: chromium
+    headless: true
+  
+  # 测试环境
+  testing:
+    base_url: http://test.ruoyi.com
+    username: admin
+    password: admin123
+    browser: chromium
+    headless: true
+  
+  # 预生产环境
+  preproduction:
+    base_url: http://preprod.ruoyi.com
+    username: pre_admin
+    password: pre_admin123
+    browser: chromium
+    headless: true
+  
+  # 生产环境
+  production:
+    base_url: http://prod.ruoyi.com
+    username: prod_admin
+    password: prod_admin123
+    browser: chromium
+    headless: true

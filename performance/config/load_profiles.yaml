@@ -1,0 +1,67 @@
+# 负载配置文件
+
+# 登录压力测试
+login_stress:
+  users: 100      # 并发用户数
+  spawn_rate: 10   # 每秒新增用户数
+  duration: 60     # 测试持续时间（秒）
+  ramp_up: 30      #  Ramp-up时间（秒）
+  ramp_down: 10    #  Ramp-down时间（秒）
+
+# 用户CRUD负载测试
+user_crud_load:
+  users: 50        # 并发用户数
+  spawn_rate: 5    # 每秒新增用户数
+  duration: 120    # 测试持续时间（秒）
+  ramp_up: 60      #  Ramp-up时间（秒）
+  ramp_down: 20    #  Ramp-down时间（秒）
+
+# 并发API测试
+concurrent_api:
+  users: 80        # 并发用户数
+  spawn_rate: 8    # 每秒新增用户数
+  duration: 90     # 测试持续时间（秒）
+  ramp_up: 45      #  Ramp-up时间（秒）
+  ramp_down: 15    #  Ramp-down时间（秒）
+
+# 稳定性测试
+endurance_test:
+  users: 30        # 并发用户数
+  spawn_rate: 3    # 每秒新增用户数
+  duration: 3600   # 测试持续时间（秒）
+  ramp_up: 120     #  Ramp-up时间（秒）
+  ramp_down: 60    #  Ramp-down时间（秒）
+
+
+scenarios:
+  login_stress:
+    description: "登录压力测试"
+    users:
+      - name: "ramp_up"
+        users: 100
+        spawn_rate: 10
+        duration: "5m"
+      - name: "peak"
+        users: 500
+        spawn_rate: 50
+        duration: "10m"
+      - name: "recovery"
+        users: 100
+        spawn_rate: 10
+        duration: "5m"
+  
+  user_crud_load:
+    description: "用户 CRUD 负载测试"
+    users:
+      - name: "normal_load"
+        users: 50
+        spawn_rate: 5
+        duration: "30m"
+  
+  api_endurance:
+    description: "接口稳定性测试"
+    users:
+      - name: "endurance"
+        users: 20
+        spawn_rate: 2
+        duration: "4h"

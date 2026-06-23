@@ -1,0 +1,1009 @@
+# UI 元素定位配置
+
+locators:
+#===============================================公共元素 ===================================
+  common:
+  #=====系统弹窗元素定位器==================
+    operate_message:
+      strategy: role
+      value: alert
+      chain:
+        - method: first
+      description: 操作提示消息
+    more_button: 
+      strategy: role
+      value: button
+      options:
+        name: "更多"
+      description: 更多操作按钮
+    table_list: ".el-table__body tbody"
+  #-----------------------系统提示弹窗------------------
+    sys_prompt:
+      strategy: role
+      value: dialog
+      options:
+        name: "提示"
+      description: 系统提示弹窗
+    sys_prompt_confirm:
+      strategy: role
+      value: button
+      options:
+        name: "确定"
+      description: 系统提示弹窗确认按钮
+    sys_prompt_cancel:
+      strategy: role
+      value: button
+      options:
+        name: "取消"
+      description: 系统提示弹窗取消按钮
+    user_login_prompt:
+      strategy: role
+      value: dialog
+      options:
+        name: "安全提示"
+      description: 用户登录提示弹窗
+    user_login_prompt_cancel:
+      strategy: role
+      value: button
+      options:
+        name: "取消"
+      description: 用户登录提示弹窗取消按钮
+  #-------------------------表单验证错误提示------------------
+    form_item_error:
+      strategy: css
+      value: ".el-form-item__error"
+      description: 表单字段错误提示
+    loading_mask:
+      strategy: css
+      value: ".loading-mask"
+      description: 加载遮罩层
+  #-------------------------操作区域按钮元素定位---------------
+    add_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "新增"}
+        - method: first
+      description: 新增按钮
+    modify_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "修改"}
+        - method: first
+      description: 修改按钮
+    batch_delete_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "删除"}
+        - method: first
+      description: 批量删除按钮
+    import_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "导入"}
+        - method: first
+      description: 导入按钮
+    export_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "导出"}
+        - method: first
+      description: 导出按钮
+    #-------------------------搜索区域公共元素------------------
+    search_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "搜索"}
+        - method: first
+      description: 搜索按钮 
+    search_reset_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "重置"}
+        - method: first
+      description: 搜索重置按钮
+    #------------------------表单区域公共元素定位-----------------
+    save_button: 
+      strategy: role
+      value: button
+      options:
+        name: "确 定"
+      description: 保存按钮
+    cancel_button: 
+      strategy: role
+      value: button
+      options:
+        name: "取 消"
+      description: 取消按钮
+    
+    switch_tab:
+      strategy: css
+      value: "#tags-view-container"
+      chain:
+        - method: get_by_text
+          args: ["{{tab_name}}"]
+        - method: first
+      description: 切换tab页
+    close_tab: 
+      strategy: css
+      value: ".tags-view-item.router-link-exact-active > .el-icon-close"
+      description: 关闭当前tab页
+
+# ================================================ 登录模块 ====================================
+  login:
+    username_input:
+      strategy: get_by_placeholder
+      value: "账号" 
+    
+    password_input:
+      strategy: get_by_placeholder
+      value: "密码"
+
+    captcha_input:
+      strategy: get_by_placeholder
+      value: "验证码"
+      description: 验证码输入框
+    captcha_image:
+      strategy: css
+      value: ".login-code-img, img[src*='data:image'], .captcha-img"
+      description: 验证码图片
+    remember_me:
+      strategy: css
+      value: ".el-checkbox"
+      description: 记住密码复选框
+    
+    submit_button:
+      strategy: get_by_text
+      value: "登 录"
+      options:
+        exact: True
+      description: 登录按钮
+         
+    error_message:
+      strategy: css
+      value: ".el-message--error, .el-alert--error, [class*='error']"
+      description: 登录错误提示
+    #退出登录元素定位器
+    user_info:
+      strategy: css
+      value: ".user-nickname"
+      description: 用户信息按钮
+    
+    logout_button:
+      strategy: css
+      value: ".el-dropdown-menu__item"
+      chain:
+        - method: filter
+          kwargs: {"has_text": "退出登录"}
+      description: 退出登录按钮
+
+# ================================================ 首页模块 ====================================
+  home:
+    #退出登录元素定位器
+    user_info:
+      strategy: css
+      value: ".user-nickname"
+      description: 用户信息按钮
+    logout_button:
+      strategy: css
+      value: ".el-dropdown-menu__item"
+      chain:
+        - method: filter
+          kwargs: {"has_text": "退出登录"}
+      description: 退出登录按钮
+    menu_list:
+      strategy: role
+      value: menuitem
+      
+    menu:
+      strategy: css
+      value: ".sidebar-container"
+      description: 左侧菜单容器
+    user_management:
+      strategy: css
+      value: ".sidebar-container"
+      chain:
+        - method: get_by_text
+          args: ["用户管理"]
+      description: 用户管理菜单
+
+# ================================================ 部门模块 ====================================
+  dept:
+    add_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "新增"}
+        - method: first
+      description: 新增部门按钮
+    
+    add_child_button: 
+      strategy: role
+      value: button
+      options:
+        name: "新增"
+      description: 新增子部门按钮
+    dept_name: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加部门"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入部门名称"]
+      description: 部门名称输入框
+    dept_sort: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加部门"
+      chain:
+        - method: get_by_role
+          args: ["spinbutton"]
+      description: 部门排序输入框
+    save_button: 
+      strategy: role
+      value: button
+      options:
+        name: "确 定"
+      description: 保存部门按钮
+    cancel_button: 
+      strategy: role
+      value: button
+      options:
+        name: "取 消"
+      description: 取消添加部门按钮
+    delete_button: 
+      strategy: role
+      value: button
+      options:
+        name: "删除"
+      description: 删除部门按钮
+    search_input: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入部门名称"]
+      description: 部门搜索输入框
+    search_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "搜索"}
+        - method: first
+      description: 部门搜索按钮
+    treeselect:
+      strategy: css
+      value: ".vue-treeselect__input"
+      description: 部门选择器
+    #------编辑-----
+    edit_dept_name: 
+      strategy: role
+      value: dialog
+      options:
+        name: "修改部门"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入部门名称"]
+      description: 部门名称输入框
+    edit_dept_sort: 
+      strategy: role
+      value: dialog
+      options:
+        name: "修改部门"
+      chain:
+        - method: get_by_role
+          args: ["spinbutton"]
+      description: 部门排序输入框
+
+# ================================================ 用户模块 ====================================
+  user:
+    add_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "新增"}
+        - method: first
+      description: 新增用户按钮
+    add_dialog:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加用户"
+      description: 添加用户弹窗
+    username: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加用户"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入用户名称"]
+      description: 用户名输入框
+    nickName: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加用户"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入用户昵称"]
+      description: 用户昵称输入框
+    password: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加用户"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入用户密码"]
+      description: 密码输入框
+    email: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加用户"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入邮箱"]
+      description: 邮箱输入框
+    phone: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加用户"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入手机号码"]
+      description: 手机号输入框
+    roleselect: 
+      strategy: role
+      value: dialog
+      options:
+        name: 添加用户
+      chain:
+        - method: get_by_role
+          args: ["textbox"]
+          kwargs: {"name": "请选择角色"}
+      description: 角色选择器
+    save_button: 
+      strategy: role
+      value: button
+      options:
+        name: 确 定
+      description: 保存用户按钮
+    cancel_button: 
+      strategy: role
+      value: button
+      options:
+        name: 取 消
+      description: 取消添加用户按钮
+    form_item_error: 
+      strategy: css
+      value: ".el-form-item__error"
+      description: 表单字段错误提示
+    edit_dialog: 
+      strategy: role
+      value: dialog
+      options:
+        name: "修改用户"
+      description: 修改用户对话框
+    delete_button: 
+      strategy: role
+      value: button
+      options:
+        name: "删除"
+      description: 删除用户按钮
+    search_input: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入用户名"]
+      description: 用户搜索输入框
+    phone_search_input: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入手机号码"]
+      description: 手机号搜索输入框
+    search_status:
+      strategy: get_by_placeholder
+      value: "用户状态"
+      description: 用户状态选择器
+    search_status_normal:
+      strategy: role
+      value: listitem
+      options:
+        name: "正常"
+      description: 正常状态搜索输入框
+    search_status_disabled:
+      strategy: role
+      value: listitem
+      options:
+        name: "停用"
+      description: 停用状态搜索输入框
+
+    edit_nickName: 
+      strategy: role
+      value: dialog
+      options:
+        name: "修改用户"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入用户昵称"]
+      description: 编辑用户昵称输入框
+
+    edit_save_button: 
+      strategy: role
+      value: button
+      options:
+        name: "确 定"
+      description: 保存编辑用户按钮
+    edit_cancel_button: 
+      strategy: role
+      value: button
+      options:
+        name: "取 消"
+      description: 取消编辑用户按钮
+    assign_role_button: 
+      strategy: role
+      value: menuitem
+      options:
+        name: "分配角色"
+      description: 分配角色按钮
+
+    reset_password_button: 
+      strategy: css
+      value: ".el-dropdown-menu__item:has-text('重置密码')"
+      description: 重置密码按钮
+    reset_password_input: 
+      strategy: role
+      value: dialog
+      options:
+        name: "提示"
+      chain:
+        - method: get_by_role
+          args: ["textbox"]
+      description: 重置密码输入框
+    reset_confirm_button: 
+      strategy: role
+      value: button
+      options:
+        name: "确定"
+      description: 确认重置密码按钮
+    reset_cancel_button: 
+      strategy: role
+      value: button
+      options:
+        name: "取消"
+      description: 取消重置密码按钮
+    role_assign_confirm_button: 
+      strategy: role
+      value: button
+      options:
+        name: "提交"
+      description: 确认分配角色按钮
+    delete_cancel_button: 
+      strategy: role
+      value: button
+      options:
+        name: "取消"
+      description: 取消删除用户按钮
+
+# ================================================ 角色模块 ====================================
+  role:
+    add_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "新增"}
+        - method: first
+      description: 新增角色按钮
+    add_dialog:
+      strategy: css
+      value: ".el-dialog[aria-label='添加角色']"
+      description: 添加角色弹窗
+    roleName: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加角色"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入角色名称"]
+      description: 角色名称输入框
+    roleKey: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加角色"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入权限字符"]
+      description: 角色权限字符串输入框
+    roleSort: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加角色"
+      chain:
+        - method: get_by_role
+          args: ["spinbutton"]
+      description: 角色排序输入框
+    save_button: 
+      strategy: role
+      value: button
+      options:
+        name: "确 定"
+      description: 保存角色按钮
+    close_button: 
+      strategy: role
+      value: dialog
+      options:
+        name: "添加角色"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "Close"}
+      description: 取消添加角色按钮 
+
+    cancel_button: 
+      strategy: role
+      value: button
+      options:
+        name: "取 消"
+      description: 取消添加角色按钮
+    add_role_cancel_button:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加角色"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "取 消"}
+      description: 取消添加角色按钮 
+      
+    delete_button: 
+      strategy: role
+      value: button
+      options:
+        name: "删除"
+      description: 删除角色按钮
+    edit_roleName:
+      strategy: role
+      value: dialog
+      options:
+        name: "修改角色"
+      chain: 
+        - method: get_by_placeholder
+          args: ["请输入角色名称"]
+      description: 修改角色按钮
+    edit_roleKey:
+      strategy: role
+      value: dialog
+      options:
+        name: "修改角色"
+      chain: 
+        - method: get_by_placeholder
+          args: ["请输入权限字符"]
+      description: 修改角色按钮
+    edit_roleSort:
+      strategy: role
+      value: dialog
+      options:
+        name: "修改角色"
+      chain:
+        - method: get_by_role
+          args: ["spinbutton"]
+      description: 角色排序输入框
+    #搜索角色区域
+    search_input: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入角色名称"]
+      description: 角色搜索输入框
+    search_roleKey:
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入权限字符"]
+      description: 角色搜索输入框
+    search_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "搜索"}
+        - method: first
+      description: 角色搜索按钮
+    #分配数据权限
+    chose_permissions_button:
+      strategy: role
+      value: dialog
+      options:
+        name: "分配数据权限"
+      chain:
+        - method: get_by_placeholder
+          args: ["请选择"]
+#=============================================== 字典模块 ====================================
+  dict:
+  #----------------------字典类型表单------------------
+    dict_name:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加字典类型"
+      chain:
+        - method: get_by_role
+          args: ["textbox"]
+          kwargs: {"name": "请输入字典名称"}    
+    dict_type:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加字典类型"
+      chain:
+        - method: get_by_role
+          args: ["textbox"]
+          kwargs: {"name": "请输入字典类型"} 
+    #------------------修改字典类型--------
+    edit_type_button:
+      strategy: role
+      value: button
+      options:
+        name: "修改"
+      description: 修改字典类型按钮
+    edit_dict_name:
+      strategy: role
+      value: dialog
+      options:
+        name: "修改字典类型"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入字典名称"]
+      description: 修改字典类型输入框
+    edit_dict_type:
+      strategy: role
+      value: dialog
+      options:
+        name: "修改字典类型"
+      chain:
+        - method: get_by_role
+          args: ["textbox"]
+          kwargs: {"name": "请输入字典类型"} 
+      description: 修改字典类型输入框
+  #--------------------字典数据表单
+    dict_label:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加字典数据"
+      chain:
+        - method: get_by_role
+          args: ["textbox"]
+          kwargs: {"name": "请输入数据标签"}     
+    dict_value:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加字典数据"
+      chain:
+        - method: get_by_role
+          args: ["textbox"]
+          kwargs: {"name": "请输入数据键值"}
+    dict_sort:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加字典数据"
+      chain:
+        - method: get_by_role
+          args: ["spinbutton"]
+      description: 字典数据排序输入框
+    #--------修改字典数据表单------------------
+    edit_data_button:
+      strategy: role
+      value: button
+      options:
+        name: "修改"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入数据标签"]
+    edit_dict_value:
+      strategy: role
+      value: dialog
+      options:
+        name: "修改字典数据"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入数据键值"]
+      description: 字典数据键值输入框
+      
+    
+
+
+    #-------搜索区域元素定位---------------
+    search_input:
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入字典名称"]
+      description: 字典搜索输入框
+    search_dicttype:
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入字典类型"]
+      description: 字典搜索输入框
+    search_button:
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "搜索"}
+        - method: first
+      description: 字典搜索按钮
+    search_status_normal:
+      strategy: role
+      value: listitem
+      options:
+        name: "正常"
+      description: 字典状态搜索输入框
+    search_status_disabled:
+      strategy: role
+      value: listitem
+      options:
+        name: "停用"
+      description: 字典状态搜索输入框
+
+
+    search_dictdata:
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入字典标签"]
+      description: 字典数据搜索输入框
+    dict_type_list:
+      strategy: css
+      value: ".dict-type-list"
+      description: 字典类型列表
+    dict_data_list:
+      strategy: css
+      value: ".dict-data-list"
+      description: 字典数据列表
+
+# ================================================ 菜单模块 ====================================
+  menu:
+    #----------------------菜单表单------------------
+    menu_name_input:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加菜单"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入菜单名称"]
+      description: 菜单名称输入框
+    menu_path_input:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加菜单"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入路由地址"]
+      description: 菜单路径输入框
+    menu_component_input:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加菜单"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入组件路径"]
+      description: 菜单组件输入框
+    menu_sort_input:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加菜单"
+      chain:
+        - method: get_by_role
+          args: ["spinbutton"]
+      description: 菜单排序输入框
+    menu_icon_input:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加菜单"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入图标"]
+      description: 菜单图标输入框
+    menu_type:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加菜单"
+      chain:
+        - method: get_by_role
+          args: ["radio"]
+          kwargs: {"name": "{{menu_type}}"}
+      description: 菜单类型选择器
+    save_button:
+      strategy: role
+      value: button
+      options:
+        name: "确 定"
+      description: 保存菜单按钮
+    cancel_button:
+      strategy: role
+      value: button
+      options:
+        name: "取 消"
+      description: 取消添加菜单按钮
+    #----------------------编辑菜单表单------------------
+    edit_menu_name_input:
+      strategy: role
+      value: dialog
+      options:
+        name: "修改菜单"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入菜单名称"]
+      description: 编辑菜单名称输入框
+    #----------------------删除菜单------------------
+    confirm_delete_button:
+      strategy: role
+      value: button
+      options:
+        name: "确定"
+      description: 确认删除菜单按钮
+    #----------------------搜索菜单------------------
+    search_input:
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入菜单名称"]
+      description: 菜单搜索输入框
+    search_button:
+      strategy: role
+      value: button
+      options:
+        name: "搜索"
+      description: 菜单搜索按钮
+    #----------------------菜单树------------------
+    menu_tree:
+      strategy: css
+      value: ".el-tree-node__content"
+      description: 菜单树节点
+
+# ================================================ 岗位模块 ====================================
+  post:
+    add_button: 
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "新增"}
+        - method: first
+      description: 新增岗位按钮
+    post_name:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加岗位"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入岗位名称"]
+      description: 岗位名称输入框
+    post_code:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加岗位"
+      chain:
+        - method: get_by_placeholder
+          args: ["请输入编码名称"]
+      description: 岗位编码输入框
+    post_sort:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加岗位"
+      chain:
+        - method: get_by_role
+          args: ["spinbutton"]
+      description: 岗位排序输入框
+    save_button:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加岗位"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "确 定"}
+      description: 保存岗位按钮
+    cancel_button:
+      strategy: role
+      value: dialog
+      options:
+        name: "添加岗位"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "取 消"}
+      description: 取消添加岗位按钮
+    delete_button:
+      strategy: role
+      value: button
+      options:
+        name: "删除"
+      description: 删除岗位按钮
+    search_input:
+      strategy: get_by_role
+      value: textbox
+      options:
+        name: "请输入岗位名称"
+      description: 岗位搜索输入框
+    search_button:
+      strategy: css
+      value: "#app"
+      chain:
+        - method: get_by_role
+          args: ["button"]
+          kwargs: {"name": "搜索"}
+        - method: first
+      description: 岗位搜索按钮
+    table_list: ".el-table__body tbody"
+
+# ================================================ 个人信息模块 ====================================
+  profile:
+    #----------------------个人信息列表------------------
+    user_profile_list:
+      strategy: css
+      value: ".profile-container, .user-info-card, .el-card"
+      description: 用户个人信息卡片

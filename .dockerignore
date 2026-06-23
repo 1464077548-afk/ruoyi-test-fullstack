@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+venv/
+.env
+.env.local
+
+# Git
+.git/
+.gitignore
+
+# Build artifacts
+dist/
+target/
+*.jar
+
+# Logs
+logs/
+*.log
+
+# Reports
+reports/
+htmlcov/
+.coverage
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Misc
+__pycache__/
+.pytest_cache/
+.cache/

@@ -1,0 +1,60 @@
+# 性能阈值配置文件
+
+# 响应时间阈值（毫秒）
+response_times:
+  login: 500      # 登录接口响应时间阈值
+  user_list: 1000  # 用户列表接口响应时间阈值
+  role_list: 800   # 角色列表接口响应时间阈值
+  menu_list: 600   # 菜单列表接口响应时间阈值
+  server_info: 1200 # 服务器信息接口响应时间阈值
+  jvm_info: 1000   # JVM信息接口响应时间阈值
+
+# 错误率阈值（百分比）
+error_rates:
+  login: 0.1       # 登录接口错误率阈值
+  user_crud: 0.5   # 用户CRUD操作错误率阈值
+  api: 0.3         # 通用API错误率阈值
+  endurance: 0.2    # 稳定性测试错误率阈值
+
+# 吞吐量阈值（请求/秒）
+throughput:
+  login: 50        # 登录接口吞吐量阈值
+  user_crud: 30    # 用户CRUD操作吞吐量阈值
+  api: 40          # 通用API吞吐量阈值
+  endurance: 20     # 稳定性测试吞吐量阈值
+
+# 系统资源阈值
+system_resources:
+  cpu: 80          # CPU使用率阈值（百分比）
+  memory: 85        # 内存使用率阈值（百分比）
+  disk: 90          # 磁盘使用率阈值（百分比）
+  network: 100      # 网络带宽使用率阈值（Mbps）
+
+# 数据库性能阈值
+database:
+  query_time: 500   # 数据库查询时间阈值（毫秒）
+  connection_pool: 80 # 连接池使用率阈值（百分比）
+  transaction_time: 1000 # 事务时间阈值（毫秒）
+
+
+# 性能阈值配置
+
+thresholds:
+  api:
+    response_time:
+      p50: 200ms    # 50% 请求 < 200ms
+      p90: 500ms    # 90% 请求 < 500ms
+      p95: 1000ms   # 95% 请求 < 1s
+      p99: 2000ms   # 99% 请求 < 2s
+    error_rate: 0.1%  # 错误率 < 0.1%
+    throughput: 100   # 每秒请求数 > 100
+  
+  ui:
+    page_load: 3s     # 页面加载 < 3s
+    first_paint: 1s   # 首次绘制 < 1s
+    interactive: 5s   # 可交互时间 < 5s
+  
+  system:
+    cpu_usage: 80%    # CPU 使用率 < 80%
+    memory_usage: 80% # 内存使用率 < 80%
+    error_rate: 0.01% # 系统错误率 < 0.01%
