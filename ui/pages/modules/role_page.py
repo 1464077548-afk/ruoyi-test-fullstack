@@ -393,8 +393,18 @@ class RolePage(BaseModulePage):
         self.click(self.CANCEL_BUTTON)
 
     def search_role_by_name(self, keyword: str):
-        self.fill(self.SEARCH_INPUT, keyword)
-        return self.search_role(keyword)
+        """搜索角色（精确匹配）"""
+        self.wait_for_load_state()
+        
+        search_input = self.get_locator(self.SEARCH_INPUT)
+        search_input.clear()
+        search_input.fill(keyword)
+        
+        self.wait_for_timeout(500)
+        self.page.keyboard.press("Enter")
+        
+        self.wait_for_load_state()
+        self.wait_for_timeout(2000)
     def fill_search_rolekey_input(self, keyword: str):
         """填写角色键搜索输入框"""
         self.fill(self.SEARCH_ROLEKEY_INPUT, keyword)

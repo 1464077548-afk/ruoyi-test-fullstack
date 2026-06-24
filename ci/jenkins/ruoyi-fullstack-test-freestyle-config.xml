@@ -1,35 +1,21 @@
-<?xml version='1.1' encoding='UTF-8'?>
+<?xml version='1.0' encoding='UTF-8'?>
 <project>
-  <description>RuoYi全栈自动化测试 - Freestyle任务</description>
+  <description>若依全栈自动化测试 - Phase 1: API and UI (Parallel) | Phase 2: Performance (Serial)</description>
   <keepDependencies>false</keepDependencies>
-  <properties>
-    <jenkins.model.BuildDiscarderProperty>
-      <artifactDiscarder class="hudson.tasks.LogRotator">
-        <daysToKeepStr>30</daysToKeepStr>
-        <numToKeepStr>50</numToKeepStr>
-        <artifactDaysToKeepStr>7</artifactDaysToKeepStr>
-        <artifactNumToKeepStr>10</artifactNumToKeepStr>
-      </artifactDiscarder>
-    </jenkins.model.BuildDiscarderProperty>
-    <hudson.plugins.build_timeout.BuildTimeoutPlugin>
-      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>120</timeoutMinutes>
-      </strategy>
-      <operationList/>
-    </hudson.plugins.build_timeout.BuildTimeoutPlugin>
-  </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@5.2.2">
-    <configVersion>2</configVersion>
+  <properties/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@5.4.1">
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>E:/ruoyi-ui/ruoyi_fullstack_test</url>
+        <url>REPLACE_WITH_YOUR_GIT_REPO_URL</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>refs/heads/main</name>
+        <name>*/main</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
     <extensions/>
   </scm>
   <canRoam>true</canRoam>
@@ -37,107 +23,110 @@
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <hudson.triggers.SCMTrigger>
-      <spec>H/15 * * * *</spec>
-      <ignorePostCommitHooks>false</ignorePostCommitHooks>
-    </hudson.triggers.SCMTrigger>
     <hudson.triggers.TimerTrigger>
-      <spec>0 0 * * *</spec>
+      <spec>H 2 * * *</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.BatchFile>
-      <command>E:\ruoyi-ui\ruoyi_fullstack_test\run_tests.bat</command>
+      <command>call E:\ruoyi-ui\ruoyi_fullstack_test\run_api_ui_tests.bat</command>
+      <unstableReturnCode>0</unstableReturnCode>
+    </hudson.tasks.BatchFile>
+    <hudson.tasks.BatchFile>
+      <command>call E:\ruoyi-ui\ruoyi_fullstack_test\run_performance_tests.bat</command>
+      <unstableReturnCode>0</unstableReturnCode>
     </hudson.tasks.BatchFile>
   </builders>
   <publishers>
     <hudson.tasks.junit.JUnitResultArchiver>
-      <testResults>reports/junit/junit.xml</testResults>
+      <testResults>E:\ruoyi-ui\ruoyi_fullstack_test\reports\junit\junit_api_ui.xml</testResults>
+      <healthScaleFactor>1.0</healthScaleFactor>
       <allowEmptyResults>true</allowEmptyResults>
-      <keepLongStdio>true</keepLongStdio>
+      <keepLongStdio>false</keepLongStdio>
+      <healthEnabled>true</healthEnabled>
+      <ignoreBlankFiles>false</ignoreBlankFiles>
     </hudson.tasks.junit.JUnitResultArchiver>
-    <hudson.tasks.ArtifactArchiver>
-      <artifacts>reports/html/report.html</artifacts>
-      <allowEmptyArchive>false</allowEmptyArchive>
-      <fingerprint>false</fingerprint>
-    </hudson.tasks.ArtifactArchiver>
-    <hudson.plugins.email_ext.EmailExtPublisher>
+    <htmlpublisher.HtmlPublisher>
+      <reportTargets>
+        <htmlpublisher.HtmlPublisherTarget>
+          <reportName>Phase-1-API-UI-Report</reportName>
+          <reportDir>E:\ruoyi-ui\ruoyi_fullstack_test\reports\html</reportDir>
+          <reportFiles>report_api_ui.html</reportFiles>
+          <keepAll>true</keepAll>
+          <alwaysLinkToLastBuild>true</alwaysLinkToLastBuild>
+          <allowMissing>false</allowMissing>
+        </htmlpublisher.HtmlPublisherTarget>
+      </reportTargets>
+    </htmlpublisher.HtmlPublisher>
+    <hudson.tasks.junit.JUnitResultArchiver>
+      <testResults>E:\ruoyi-ui\ruoyi_fullstack_test\reports\junit\junit_performance.xml</testResults>
+      <healthScaleFactor>1.0</healthScaleFactor>
+      <allowEmptyResults>true</allowEmptyResults>
+      <keepLongStdio>false</keepLongStdio>
+      <healthEnabled>true</healthEnabled>
+      <ignoreBlankFiles>false</ignoreBlankFiles>
+    </hudson.tasks.junit.JUnitResultArchiver>
+    <htmlpublisher.HtmlPublisher>
+      <reportTargets>
+        <htmlpublisher.HtmlPublisherTarget>
+          <reportName>Phase-2-Performance-Report</reportName>
+          <reportDir>E:\ruoyi-ui\ruoyi_fullstack_test\reports\html</reportDir>
+          <reportFiles>report_performance.html</reportFiles>
+          <keepAll>true</keepAll>
+          <alwaysLinkToLastBuild>true</alwaysLinkToLastBuild>
+          <allowMissing>true</allowMissing>
+        </htmlpublisher.HtmlPublisherTarget>
+      </reportTargets>
+    </htmlpublisher.HtmlPublisher>
+    <allure.jenkins.tool.AllureReportPublisher>
+      <reportVersion>2</reportVersion>
+      <results>
+        <allure.jenkins.tool.AllureReportPublisher_-Result>
+          <glob>E:\ruoyi-ui\ruoyi_fullstack_test\reports\allure_api_ui\**\allure-*.xml</glob>
+        </allure.jenkins.tool.AllureReportPublisher_-Result>
+      </results>
+    </allure.jenkins.tool.AllureReportPublisher>
+    <hudson.plugins.emailext.ExtendedEmailPublisher>
       <recipientList>hejianping911@163.com</recipientList>
       <configuredTriggers>
-        <hudson.plugins.email_ext.plugins.trigger.AlwaysTrigger>
-          <triggerCondition>ALWAYS</triggerCondition>
-        </hudson.plugins.email_ext.plugins.trigger.AlwaysTrigger>
-        <hudson.plugins.email_ext.plugins.trigger.FailureTrigger>
-          <triggerCondition>FAILURE</triggerCondition>
-        </hudson.plugins.email_ext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.trigger.FailureTrigger>
+          <email>
+            <subject>[Jenkins] ${BUILD_STATUS} - ${PROJECT_NAME} - Build #${BUILD_NUMBER}</subject>
+            <body>$DEFAULT_CONTENT</body>
+            <recipientList>hejianping911@163.com</recipientList>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.trigger.FailureTrigger>
+        <hudson.plugins.emailext.trigger.AlwaysTrigger>
+          <email>
+            <subject>[Jenkins] ${BUILD_STATUS} - ${PROJECT_NAME} - Build #${BUILD_NUMBER}</subject>
+            <body>$DEFAULT_CONTENT</body>
+            <recipientList>hejianping911@163.com</recipientList>
+            <sendToDevelopers>false</sendToDevelopers>
+            <sendToRequester>false</sendToRequester>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.trigger.AlwaysTrigger>
       </configuredTriggers>
-      <contentType>html</contentType>
-      <body><html>
-<head>
-<style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f6f8fa; }
-    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .header { padding-bottom: 16px; border-bottom: 1px solid #eaecef; margin-bottom: 20px; }
-    .header h2 { margin: 0; }
-    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-    .info-item { padding: 10px; background-color: #f6f8fa; border-radius: 6px; }
-    .info-label { font-size: 12px; color: #6e7781; text-transform: uppercase; }
-    .info-value { font-size: 14px; font-weight: 600; color: #24292e; }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
-    .badge-success { background-color: #2da44e; color: white; }
-    .badge-failure { background-color: #cf222e; color: white; }
-    .build-url { color: #0969da; font-size: 14px; }
-</style>
-</head>
-<body>
-<div class="container">
-    <div class="header">
-        <h2>${BUILD_STATUS} - RuoYi全栈测试构建 #${BUILD_NUMBER}</h2>
-        <span class="badge ${BUILD_STATUS_CLASS}">${BUILD_STATUS}</span>
-    </div>
-    
-    <div class="info-grid">
-        <div class="info-item">
-            <div class="info-label">构建编号</div>
-            <div class="info-value">#${BUILD_NUMBER}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">构建状态</div>
-            <div class="info-value">${currentBuild.currentResult}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">构建时间</div>
-            <div class="info-value">${currentBuild.durationString}</div>
-        </div>
-    </div>
-    
-    <div style="margin-bottom: 20px; padding: 12px; background-color: #eff6ff; border-radius: 6px;">
-        <strong>构建URL:</strong> <a href="${BUILD_URL}" class="build-url">${BUILD_URL}</a>
-    </div>
-    
-    <div style="margin-bottom: 20px;">
-        <strong>测试报告:</strong>
-        <ul>
-            <li><a href="${BUILD_URL}artifact/reports/html/report.html">HTML报告</a></li>
-            <li><a href="${BUILD_URL}testReport">JUnit报告</a></li>
-        </ul>
-    </div>
-    
-    <div style="padding-top: 16px; border-top: 1px solid #eaecef; color: #6e7781; font-size: 12px;">
-        <p>此邮件由Jenkins CI/CD自动发送</p>
-    </div>
-</div>
-</body>
-</html></body>
-      <subject>[${currentBuild.currentResult}] RuoYi全栈测试构建 #${BUILD_NUMBER}</subject>
-      <attachmentsPattern/>
-      <attachmentBuildLog>false</attachmentBuildLog>
-      <compressBuildLog>false</compressBuildLog>
-      <replyToAddress/>
-      <fromAddress>jenkins@163.com</fromAddress>
-      <mailer class="hudson.plugins.email_ext.mailer.ExtendedEmailPublisherDescriptor$ExtendedMailer"/>
-    </hudson.plugins.email_ext.EmailExtPublisher>
+      <contentType>text/html</contentType>
+      <defaultSubject>[Jenkins] ${BUILD_STATUS} - ${PROJECT_NAME}</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+      <attachmentsPattern></attachmentsPattern>
+      <presendScript></presendScript>
+      <postsendScript></postsendScript>
+      <attachBuildLog>false</attachBuildLog>
+      <compressFile>false</compressFile>
+      <replyTo></replyTo>
+      <saveOutput>false</saveOutput>
+      <disabled>false</disabled>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
   </publishers>
-  <buildWrappers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper/>
+  </buildWrappers>
 </project>

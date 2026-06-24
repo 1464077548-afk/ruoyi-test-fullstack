@@ -169,7 +169,7 @@ class CommonBiz(BasePage):
             if rows:
                 count = rows.count()
                 self.logger.info(f"找到 {count} 行数据")
-                return count
+                return {"count": count,"rows": rows}
    
         except Exception as e:
             self.logger.error(f"获取搜索结果数量失败: {e}")
@@ -187,18 +187,21 @@ class CommonBiz(BasePage):
             input_locator.fill(keyword)
             self.click(search_button)
             
-            result_count = self.get_search_result(page_obj)
-            self.logger.info(f"搜索结果数量: {result_count}")
-            return result_count
+            result = self.get_search_result(page_obj)
+            self.logger.info(f"搜索结果数量: {result['count']}")
+            
+            key_row = result['rows'].filter(has_text=keyword).first
+            self.logger.info(f"✅找到角色 {key_row.text_content}")
+            return key_row.count()
         except Exception as e:
             self.logger.error(f"搜索失败: {e}")
             # 尝试使用fill方法
             try:
                 self.fill(search_input, keyword)
                 self.click(search_button)
-                result_count = self.get_search_result(page_obj)
-                self.logger.info(f"搜索结果数量: {result_count}")
-                return result_count
+                result = self.get_search_result(page_obj)
+                self.logger.info(f"搜索结果数量: {result['count']}")
+                return result
             except Exception as e2:
                 self.logger.error(f"备用搜索方法也失败: {e2}")
                 raise e2

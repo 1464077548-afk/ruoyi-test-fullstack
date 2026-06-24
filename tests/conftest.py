@@ -131,8 +131,9 @@ def session_cleanup(db_helper):
     并行执行时，只清理当前工作器创建的数据，避免影响其他工作器
     """
     import os
-    worker_id = os.environ.get('PYTEST_XDIST_WORKER', 'gw0')
-    logger.info(f"当前工作器ID: {worker_id}")
+    # 获取worker_id，在非并行模式下默认为None
+    worker_id = os.environ.get('PYTEST_XDIST_WORKER')
+    logger.info(f"当前工作器ID: {worker_id if worker_id else 'master (非并行模式)'}")
     
     # 测试开始前清理（清理所有残留数据）
     logger.info("开始清理测试会话前的残留数据...")
@@ -839,8 +840,10 @@ def pytest_collection_modifyitems(config, items):
     worker_id = os.environ.get('PYTEST_XDIST_WORKER')
     
     if worker_id:
+        # 并行模式下不调整顺序，由调度器处理
         pass
     else:
+        # 非并行模式下，确保serial标记的测试先执行
         serial_tests = [item for item in items if 'serial' in item.keywords]
         other_tests = [item for item in items if 'serial' not in item.keywords]
         
@@ -849,7 +852,11 @@ def pytest_collection_modifyitems(config, items):
 
 
 def pytest_xdist_make_scheduler(config, log):
-    """自定义测试调度器，确保serial标记的测试用例串行执行"""
+    """自定义测试调度器，确保serial标记的测试用例串行执行（仅在xdist插件可用时生效）"""
+    # 检查xdist插件是否可用
+    if not config.pluginmanager.hasplugin('xdist'):
+        return None  # 返回None表示使用默认调度器
+    
     from xdist.scheduler import LoadScopeScheduling
     
     class SerialFirstScheduling(LoadScopeScheduling):
@@ -884,9 +891,13 @@ def pytest_xdist_make_scheduler(config, log):
 
 
 def pytest_xdist_auto_num_workers(config):
-    """自动设置worker数量"""
+    """自动设置worker数量（仅在xdist插件可用时生效）"""
     import multiprocessing
     import sys
+    
+    # 检查xdist插件是否可用
+    if not config.pluginmanager.hasplugin('xdist'):
+        return None  # 返回None表示使用默认worker数量
     
     # Windows下限制worker数量，避免进程池问题
     if sys.platform.startswith('win'):

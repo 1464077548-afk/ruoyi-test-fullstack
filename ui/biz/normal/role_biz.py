@@ -63,14 +63,49 @@ class RoleBiz:
     def delete_role(self, role_name: str):
         """删除角色"""
         self.logger.info(f"❎开始删除角色: {role_name}")
-        result = self.common.common_search(self.role, role_name)
-        if not result:
+        
+        self.role.search_role_by_name(role_name)
+        self.role.wait_for_load_state()
+        self.role.wait_for_timeout(2000)
+        
+        rows = self.role.get_locator(self.role.TABLE_LIST).locator("tr").all()
+        found = False
+        
+        for row in rows:
+            try:
+                role_name_cell = row.locator("td:nth-child(3)")
+                if role_name_cell.is_visible():
+                    cell_text = role_name_cell.text_content().strip()
+                    if cell_text == role_name:
+                        action_buttons = row.locator("td").last.locator("button")
+                        btn_count = action_buttons.count()
+                        
+                        for j in range(btn_count):
+                            btn = action_buttons.nth(j)
+                            btn_text = btn.text_content()
+                            if "删除" in btn_text:
+                                btn.click()
+                                found = True
+                                break
+                            elif "更多" in btn_text:
+                                btn.click()
+                                self.role.wait_for_timeout(500)
+                                delete_option = self.role.page.locator(".el-dropdown-menu").locator("li").filter(has_text="删除")
+                                if delete_option.count() > 0:
+                                    delete_option.click()
+                                    found = True
+                                    break
+                        if found:
+                            break
+            except Exception:
+                continue
+        
+        if not found:
             raise Exception(f"未找到角色: {role_name}")
-        self.role.click_delete_role(role_name)
+        
         self.common.confirm_dialog()
         message = self.common.get_operate_message()
         if "成功" not in message:
-            #关闭新增角色的弹窗
             self.role.close_all_dialogs()
         else:
             self.logger.info(f"✅删除角色成功: {role_name}")

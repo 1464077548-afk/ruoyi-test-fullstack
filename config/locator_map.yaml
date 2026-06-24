@@ -645,12 +645,13 @@ locators:
       description: 角色搜索输入框
     search_button: 
       strategy: css
-      value: "#app"
+      value: ".app-container"
       chain:
+        - method: locator
+          args: [".el-form-item:last-child"]
         - method: get_by_role
           args: ["button"]
           kwargs: {"name": "搜索"}
-        - method: first
       description: 角色搜索按钮
     #分配数据权限
     chose_permissions_button:
