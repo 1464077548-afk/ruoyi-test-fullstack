@@ -1,0 +1,18 @@
+# GitHub Actions自动触发测试
+
+## 测试时间
+2026-06-24
+
+## 测试目的
+验证代码推送后GitHub Actions是否自动触发Jenkins构建
+
+## 当前配置
+- Jenkins地址: Serveo公网地址
+- 工作流文件: .github/workflows/trigger-jenkins.yml
+- 触发条件: push到main分支
+
+## 测试步骤
+1. 推送代码到main分支
+2. GitHub Actions自动检测并运行工作流
+3. 工作流触发Jenkins构建
+4. 验证构建是否成功
