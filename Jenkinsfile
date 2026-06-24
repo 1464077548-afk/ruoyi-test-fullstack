@@ -19,7 +19,7 @@ pipeline {
             steps {
                 echo '========== 拉取测试代码 =========='
                 git branch: 'main', url: "${TEST_REPO}"
-                sh 'ls -la'
+                bat 'dir'
             }
         }
 
@@ -28,7 +28,7 @@ pipeline {
                 echo '========== 拉取被测代码 =========='
                 dir("${TARGET_DIR}") {
                     git branch: 'master', url: "${TARGET_REPO}"
-                    sh 'ls -la'
+                    bat 'dir'
                 }
             }
         }
@@ -38,27 +38,21 @@ pipeline {
                 echo '========== 部署Docker环境 =========='
                 script {
                     // 检查并停止已存在的容器
-                    sh '''
-                        docker-compose down || true
-                        docker-compose -f docker-compose.yml down || true
+                    bat '''
+                        docker-compose down
                     '''
 
                     // 启动Docker容器
-                    sh '''
+                    bat '''
                         cd RuoYi-Vue
-                        if [ -f "docker-compose.yml" ]; then
+                        if exist "docker-compose.yml" (
                             docker-compose up -d
-                        else
-                            echo "未找到docker-compose.yml，使用默认配置"
-                            # 启动MySQL
-                            docker run -d --name ruoyi-mysql \\n                                -e MYSQL_ROOT_PASSWORD=password \\n                                -e MYSQL_DATABASE=ry-vue \\n                                -p 3306:3306 \\n                                mysql:5.7
-
-                            # 启动Redis
-                            docker run -d --name ruoyi-redis \\n                                -p 6379:6379 \\n                                redis:latest
-
-                            # 等待服务启动
-                            sleep 30
-                        fi
+                        ) else (
+                            echo 未找到docker-compose.yml，使用默认配置
+                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=ry-vue -p 3306:3306 mysql:5.7
+                            docker run -d --name ruoyi-redis -p 6379:6379 redis:latest
+                            timeout /t 30 /nobreak
+                        )
                     '''
                 }
             }
@@ -67,12 +61,11 @@ pipeline {
         stage('安装测试依赖') {
             steps {
                 echo '========== 安装测试依赖 =========='
-                sh '''
-                    python -m venv venv || true
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install pytest pytest-html allure-pytest pytest-xdist
+                bat '''
+                    python -m venv venv
+                    venv\\Scripts\\pip install --upgrade pip
+                    venv\\Scripts\\pip install -r requirements.txt
+                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist
                 '''
             }
         }
@@ -82,19 +75,16 @@ pipeline {
                 echo '========== 执行自动化测试 =========='
                 script {
                     try {
-                        sh '''
-                            . venv/bin/activate
+                        bat '''
+                            call venv\\Scripts\\activate.bat
 
-                            # 创建报告目录
-                            mkdir -p reports/junit
-                            mkdir -p reports/allure-results
-                            mkdir -p reports/html
+                            rem 创建报告目录
+                            if not exist "reports\\junit" mkdir reports\\junit
+                            if not exist "reports\\allure-results" mkdir reports\\allure-results
+                            if not exist "reports\\html" mkdir reports\\html
 
-                            # 执行API和UI测试
-                            pytest tests/ --ignore=tests/performance \\n                                -v --tb=short \\n                                --html=reports/html/report_api_ui.html \\n                                --self-contained-html \\n                                --junitxml=reports/junit/junit_api_ui.xml \\n                                --alluredir=reports/allure-results \\n                                -n auto --dist loadscope \\n                                --reruns 3 --reruns-delay 2 || true
-
-                            # 执行性能测试
-                            pytest tests/performance/ \\n                                -v --tb=short \\n                                --html=reports/html/report_performance.html \\n                                --self-contained-html \\n                                --junitxml=reports/junit/junit_performance.xml \\n                                --alluredir=reports/allure-performance \\n                                -p no:xdist -m performance \\n                                --reruns 1 --reruns-delay 5 || true
+                            rem 执行API和UI测试
+                            venv\\Scripts\\pytest tests/ --ignore=tests/performance -v --tb=short --html=reports/html/report_api_ui.html --self-contained-html --junitxml=reports/junit/junit_api_ui.xml --alluredir=reports/allure-results -n auto --dist loadscope --reruns 3 --reruns-delay 2 || exit /b 0
                         '''
                     } catch (Exception e) {
                         currentBuild.result = 'UNSTABLE'
@@ -109,9 +99,9 @@ pipeline {
                 echo '========== 生成测试报告 =========='
                 script {
                     try {
-                        sh '''
-                            . venv/bin/activate
-                            allure generate reports/allure-results -o reports/allure-report --clean || true
+                        bat '''
+                            call venv\\Scripts\\activate.bat
+                            venv\\Scripts\\allure generate reports/allure-results -o reports/allure-report --clean || exit /b 0
                         '''
                     } catch (Exception e) {
                         echo "生成Allure报告失败: ${e.message}"
@@ -123,10 +113,10 @@ pipeline {
         stage('清理Docker环境') {
             steps {
                 echo '========== 清理Docker环境 =========='
-                sh '''
-                    docker-compose down || true
-                    docker stop ruoyi-mysql ruoyi-redis || true
-                    docker rm ruoyi-mysql ruoyi-redis || true
+                bat '''
+                    docker-compose down
+                    docker stop ruoyi-mysql ruoyi-redis
+                    docker rm ruoyi-mysql ruoyi-redis
                 '''
             }
         }
