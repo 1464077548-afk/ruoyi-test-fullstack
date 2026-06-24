@@ -12,18 +12,6 @@ pipeline {
     triggers {
         // 每天晚上9点定时触发
         cron('H 21 * * *')
-        // GitHub Webhook触发
-        GenericTrigger(
-            genericVariables: [
-                [key: 'ref', value: '$.ref'],
-                [key: 'repository', value: '$.repository.full_name']
-            ],
-            causeString: 'GitHub Webhook: $ref',
-            printContributedVariables: true,
-            printPostContent: true,
-            regexpFilterText: '$ref',
-            regexpFilterExpression: 'refs/heads/main'
-        )
     }
 
     stages {
