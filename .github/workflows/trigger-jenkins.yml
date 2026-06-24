@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Trigger Jenkins Pipeline
         run: |
-          CRUMB=$(curl -s -u "${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_PASSWORD }}" "${{ secrets.NGROK_URL }}/crumbIssuer/api/json" | jq -r '.crumb')
-          curl -X POST "${{ secrets.NGROK_URL }}/job/ruoyi-fullstack-test-pipeline/build" \
-            -u "${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_PASSWORD }}" \
-            -H "Jenkins-Crumb: $CRUMB"
+          curl -s -c cookies.txt -u "${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_PASSWORD }}" "${{ secrets.NGROK_URL }}/crumbIssuer/api/json"
+          CRUMB=$(curl -s -b cookies.txt -u "${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_PASSWORD }}" "${{ secrets.NGROK_URL }}/crumbIssuer/api/json" | jq -r '.crumb')
+          curl -X POST -b cookies.txt -u "${{ secrets.JENKINS_USERNAME }}:${{ secrets.JENKINS_PASSWORD }}" -H "Jenkins-Crumb: $CRUMB" "${{ secrets.NGROK_URL }}/job/ruoyi-fullstack-test-pipeline/build"
+          echo "Jenkins build triggered successfully!"
