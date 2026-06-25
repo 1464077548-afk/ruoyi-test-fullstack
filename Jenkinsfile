@@ -65,8 +65,8 @@ pipeline {
                 bat '''
                     python -m venv venv
                     venv\\Scripts\\python.exe -m pip install --upgrade pip
-                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures py
-                    venv\\Scripts\\pip install playwright requests python-dotenv pymysql pyyaml
+                    venv\\Scripts\\pip install -r requirements.txt --prefer-binary
+                    venv\\Scripts\\pip install py
                     venv\\Scripts\\playwright install chromium
                 '''
             }
