@@ -37,23 +37,23 @@ pipeline {
             steps {
                 echo '========== 部署Docker环境 =========='
                 script {
-                    // 先强制删除已存在的容器（避免名称冲突）
                     bat '''
-                        docker rm -f ruoyi-mysql ruoyi-redis || true
-                        docker-compose down || true
+                        docker rm -f ruoyi-mysql ruoyi-redis 2>nul || exit /b 0
+                        docker-compose down 2>nul || exit /b 0
                     '''
 
-                    // 启动Docker容器
                     bat '''
-                        cd RuoYi-Vue
                         if exist "docker-compose.yml" (
-                            docker-compose up -d || exit /b 0
+                            echo 使用工作区根目录的docker-compose启动服务
+                            docker-compose up -d 2>nul || exit /b 0
                         ) else (
                             echo 未找到docker-compose.yml，使用默认配置
-                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ry-vue -p 3307:3306 mysql:5.7 || exit /b 0
-                            docker run -d --name ruoyi-redis -p 6380:6379 redis:latest || exit /b 0
-                            timeout /t 30 /nobreak || exit /b 0
+                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ry-vue -p 3307:3306 mysql:5.7 2>nul || exit /b 0
+                            docker run -d --name ruoyi-redis -p 6380:6379 redis:latest 2>nul || exit /b 0
                         )
+                        echo 等待容器启动...
+                        timeout /t 60 /nobreak >nul || exit /b 0
+                        docker ps
                     '''
                 }
             }
@@ -115,8 +115,8 @@ pipeline {
             steps {
                 echo '========== 清理Docker环境 =========='
                 bat '''
-                    docker-compose down || true
-                    docker rm -f ruoyi-mysql ruoyi-redis || true
+                    docker-compose down 2>nul || exit /b 0
+                    docker rm -f ruoyi-mysql ruoyi-redis 2>nul || exit /b 0
                 '''
             }
         }
