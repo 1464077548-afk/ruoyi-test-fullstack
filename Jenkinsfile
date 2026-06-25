@@ -65,7 +65,6 @@ pipeline {
                 bat '''
                     python -m venv venv
                     venv\\Scripts\\python.exe -m pip install --upgrade pip
-                    venv\\Scripts\\pip install pydantic-core==2.10.1 --only-binary=:all:
                     venv\\Scripts\\pip install -r requirements.txt --prefer-binary
                     venv\\Scripts\\pip install py
                     venv\\Scripts\\playwright install chromium
