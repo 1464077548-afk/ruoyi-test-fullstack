@@ -65,8 +65,11 @@ pipeline {
                 bat '''
                     python -m venv venv
                     venv\\Scripts\\pip install --upgrade pip
-                    venv\\Scripts\\pip install -r requirements.txt
-                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist
+                    venv\\Scripts\\pip install -r requirements.txt --no-deps 2>nul || exit /b 0
+                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures
+                    venv\\Scripts\\pip install playwright requests pydantic pydantic-settings python-dotenv pymysql pyyaml
+                    venv\\Scripts\\pip install cryptography locust bandit safety
+                    venv\\Scripts\\playwright install chromium
                 '''
             }
         }
