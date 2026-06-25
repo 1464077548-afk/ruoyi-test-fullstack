@@ -33,27 +33,44 @@ pipeline {
             }
         }
 
+        stage('编译被测项目') {
+            steps {
+                echo '========== 编译被测项目 =========='
+                dir("${TARGET_DIR}") {
+                    bat '''
+                        echo 编译后端项目...
+                        mvn clean package -DskipTests -q 2>&1 || exit /b 0
+                        echo 编译前端项目...
+                        cd ruoyi-ui
+                        npm install --registry=https://registry.npmmirror.com 2>&1 || exit /b 0
+                        npm run build 2>&1 || exit /b 0
+                        cd ..
+                    '''
+                }
+            }
+        }
+
         stage('部署Docker环境') {
             steps {
                 echo '========== 部署Docker环境 =========='
                 script {
                     bat '''
-                        docker rm -f ruoyi-mysql ruoyi-redis 2>nul || exit /b 0
+                        docker rm -f ruoyi-mysql ruoyi-redis ruoyi-admin ruoyi-ui ruoyi-test-runner 2>nul || exit /b 0
                         docker-compose down 2>nul || exit /b 0
                     '''
 
                     bat '''
-                        if exist "docker-compose.yml" (
-                            echo 使用工作区根目录的docker-compose启动服务
-                            docker-compose up -d 2>nul || exit /b 0
-                        ) else (
-                            echo 未找到docker-compose.yml，使用默认配置
-                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ry-vue -p 3307:3306 mysql:5.7 2>nul || exit /b 0
-                            docker run -d --name ruoyi-redis -p 6380:6379 redis:latest 2>nul || exit /b 0
-                        )
+                        echo 使用docker-compose启动完整环境...
+                        set DB_PASSWORD=123456
+                        set DB_PORT=3307
+                        set ADMIN_PORT=8080
+                        set UI_PORT=8081
+                        docker-compose up -d 2>&1 || exit /b 0
                         echo 等待容器启动...
-                        timeout /t 60 /nobreak >nul || exit /b 0
+                        timeout /t 120 /nobreak >nul || exit /b 0
                         docker ps
+                        echo 等待服务健康检查...
+                        timeout /t 120 /nobreak >nul || exit /b 0
                     '''
                 }
             }
@@ -92,6 +109,12 @@ pipeline {
                             if not exist "reports\\junit" mkdir reports\\junit
                             if not exist "reports\\allure-results" mkdir reports\\allure-results
                             if not exist "reports\\html" mkdir reports\\html
+
+                            rem 设置测试环境变量
+                            set API_BASE_URL=http://localhost:8080
+                            set BASE_URL=http://localhost:8081
+                            set TEST_USERNAME=admin
+                            set TEST_PASSWORD=admin123
 
                             rem 设置Playwright使用系统Chrome
                             set PLAYWRIGHT_BROWSERS_PATH=0
