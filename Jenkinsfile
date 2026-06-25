@@ -64,11 +64,9 @@ pipeline {
                 echo '========== 安装测试依赖 =========='
                 bat '''
                     python -m venv venv
-                    venv\\Scripts\\pip install --upgrade pip
-                    venv\\Scripts\\pip install -r requirements.txt --no-deps 2>nul || exit /b 0
-                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures
-                    venv\\Scripts\\pip install playwright requests pydantic pydantic-settings python-dotenv pymysql pyyaml
-                    venv\\Scripts\\pip install cryptography locust bandit safety
+                    venv\\Scripts\\python.exe -m pip install --upgrade pip
+                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures py
+                    venv\\Scripts\\pip install playwright requests python-dotenv pymysql pyyaml
                     venv\\Scripts\\playwright install chromium
                 '''
             }
