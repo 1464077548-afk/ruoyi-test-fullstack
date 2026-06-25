@@ -50,8 +50,8 @@ pipeline {
                             docker-compose up -d
                         ) else (
                             echo 未找到docker-compose.yml，使用默认配置
-                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ry-vue -p 3306:3306 mysql:5.7
-                            docker run -d --name ruoyi-redis -p 6379:6379 redis:latest
+                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ry-vue -p 3307:3306 mysql:5.7
+                            docker run -d --name ruoyi-redis -p 6380:6379 redis:latest
                             timeout /t 30 /nobreak
                         )
                     '''
