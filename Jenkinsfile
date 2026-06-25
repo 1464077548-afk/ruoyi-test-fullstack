@@ -63,10 +63,11 @@ pipeline {
             steps {
                 echo '========== 安装测试依赖 =========='
                 bat '''
+                    if exist venv rmdir /s /q venv
                     python -m venv venv
                     venv\\Scripts\\python.exe -m pip install --upgrade pip
-                    venv\\Scripts\\pip install -r requirements.txt --prefer-binary
-                    venv\\Scripts\\pip install py
+                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures py
+                    venv\\Scripts\\pip install playwright requests pydantic pydantic-settings python-dotenv pymysql pyyaml
                     venv\\Scripts\\playwright install chromium
                 '''
             }

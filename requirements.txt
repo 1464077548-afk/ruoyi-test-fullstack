@@ -1,9 +1,9 @@
 # 测试框架
-pytest==7.4.0
-pytest-html==3.1.1
-allure-pytest==2.13.2
-pytest-xdist==3.3.1
-pytest-rerunfailures==16.3
+pytest==8.3.3
+pytest-html==4.2.0
+allure-pytest==2.16.0
+pytest-xdist==3.8.0
+pytest-rerunfailures==17.2
 
 # Web测试
 playwright==1.39.0
