@@ -68,7 +68,14 @@ pipeline {
                     venv\\Scripts\\python.exe -m pip install --upgrade pip
                     venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures py
                     venv\\Scripts\\pip install playwright requests pydantic pydantic-settings python-dotenv pymysql pyyaml
-                    venv\\Scripts\\playwright install chromium
+                    
+                    if exist "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" (
+                        echo 检测到系统Chrome，跳过Playwright浏览器下载
+                        set PLAYWRIGHT_BROWSERS_PATH=0
+                    ) else (
+                        echo 未检测到系统Chrome，尝试下载Playwright Chromium
+                        venv\\Scripts\\playwright install chromium
+                    )
                 '''
             }
         }
@@ -85,6 +92,10 @@ pipeline {
                             if not exist "reports\\junit" mkdir reports\\junit
                             if not exist "reports\\allure-results" mkdir reports\\allure-results
                             if not exist "reports\\html" mkdir reports\\html
+
+                            rem 设置Playwright使用系统Chrome
+                            set PLAYWRIGHT_BROWSERS_PATH=0
+                            set CHROME_BINARY_PATH=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe
 
                             rem 执行API和UI测试
                             venv\\Scripts\\pytest tests/ --ignore=tests/performance -v --tb=short --html=reports/html/report_api_ui.html --self-contained-html --junitxml=reports/junit/junit_api_ui.xml --alluredir=reports/allure-results -n auto --dist loadscope --reruns 3 --reruns-delay 2 || exit /b 0
