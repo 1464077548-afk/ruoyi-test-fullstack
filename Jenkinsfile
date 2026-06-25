@@ -37,9 +37,10 @@ pipeline {
             steps {
                 echo '========== 部署Docker环境 =========='
                 script {
-                    // 检查并停止已存在的容器
+                    // 先强制删除已存在的容器（避免名称冲突）
                     bat '''
-                        docker-compose down
+                        docker rm -f ruoyi-mysql ruoyi-redis || true
+                        docker-compose down || true
                     '''
 
                     // 启动Docker容器
@@ -49,7 +50,7 @@ pipeline {
                             docker-compose up -d
                         ) else (
                             echo 未找到docker-compose.yml，使用默认配置
-                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=ry-vue -p 3306:3306 mysql:5.7
+                            docker run -d --name ruoyi-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=ry-vue -p 3306:3306 mysql:5.7
                             docker run -d --name ruoyi-redis -p 6379:6379 redis:latest
                             timeout /t 30 /nobreak
                         )
@@ -114,9 +115,8 @@ pipeline {
             steps {
                 echo '========== 清理Docker环境 =========='
                 bat '''
-                    docker-compose down
-                    docker stop ruoyi-mysql ruoyi-redis
-                    docker rm ruoyi-mysql ruoyi-redis
+                    docker-compose down || true
+                    docker rm -f ruoyi-mysql ruoyi-redis || true
                 '''
             }
         }
