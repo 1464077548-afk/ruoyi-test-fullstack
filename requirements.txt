@@ -3,7 +3,7 @@ pytest==8.3.3
 pytest-html==4.2.0
 allure-pytest==2.16.0
 pytest-xdist==3.8.0
-pytest-rerunfailures==17.2
+pytest-rerunfailures==16.0.1
 
 # Web测试
 playwright==1.39.0
