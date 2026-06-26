@@ -10,4 +10,6 @@ ENV JAVA_OPTS="-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Dsun.jnu.encoding
 
 WORKDIR /app
 
+COPY RuoYi-Vue/ruoyi-admin/target/ruoyi-admin.jar /app/ruoyi-admin.jar
+
 CMD ["java", "-Dfile.encoding=UTF-8", "-Dsun.jnu.encoding=UTF-8", "-jar", "ruoyi-admin.jar"]
