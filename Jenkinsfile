@@ -43,7 +43,7 @@ pipeline {
                         echo 编译前端项目...
                         cd ruoyi-ui
                         npm install --registry=https://registry.npmmirror.com 2>&1 || exit /b 0
-                        npm run build 2>&1 || exit /b 0
+                        npm run build:prod 2>&1 || exit /b 0
                         cd ..
                     '''
                 }
