@@ -98,18 +98,20 @@ class TestAuthApiImproved:
     @pytest.mark.p1
     def test_login_with_wrong_captcha(self, auth_client, settings):
         """P1-验证码错误 - 验证验证码校验"""
-        # 获取验证码
         captcha_response = auth_client.get_captcha()
         assert captcha_response.get("code") == 200, "获取验证码失败"
+        
+        captcha_enabled = captcha_response.get("captchaEnabled", True)
+        if not captcha_enabled:
+            pytest.skip("验证码功能已关闭，跳过此测试")
         
         uuid = captcha_response.get("uuid")
         assert uuid is not None, "uuid为空"
         
-        # 使用错误的验证码登录
         response = auth_client.post("/login", {
             "username": settings.USERNAME,
             "password": settings.PASSWORD,
-            "captcha": "wrong_captcha_1234",  # 错误的验证码
+            "captcha": "wrong_captcha_1234",
             "uuid": uuid
         })
         
