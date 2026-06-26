@@ -41,8 +41,8 @@ services:
 
   ruoyi-admin:
     build:
-      context: ./config
-      dockerfile: Dockerfile.ruoyi-admin
+      context: .
+      dockerfile: config/Dockerfile.ruoyi-admin
     container_name: ruoyi-admin
     working_dir: /app
     environment:
