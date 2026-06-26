@@ -15,21 +15,24 @@ class AuthClient(BaseClient):
     
     def login(self, username: str, password: str) -> Dict[str, Any]:
         """登录接口"""
-        # 先获取验证码
         captcha_response = self.get_captcha()
         if captcha_response.get("code") != 200:
             raise Exception(f"获取验证码失败: {captcha_response.get('msg')}")
         
-        captcha = "1234"  # 这里应该从验证码图片中识别，暂时硬编码
-        uuid = captcha_response.get("uuid")
+        captcha_enabled = captcha_response.get("captchaEnabled", True)
         
         endpoint = "/login"
         data = {
             "username": username,
-            "password": password,
-            "captcha": captcha,
-            "uuid": uuid
+            "password": password
         }
+        
+        if captcha_enabled:
+            captcha = "1234"
+            uuid = captcha_response.get("uuid")
+            data["captcha"] = captcha
+            data["uuid"] = uuid
+        
         response = self.post(endpoint, data)
         # 确保响应格式一致，将token放入data字段
         if "token" in response and "data" not in response:
