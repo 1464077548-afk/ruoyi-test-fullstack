@@ -16,14 +16,6 @@ pipeline {
     }
 
     stages {
-        stage('拉取测试代码') {
-            steps {
-                echo '========== 拉取测试代码 =========='
-                git branch: 'main', url: "${TEST_REPO}"
-                bat 'dir'
-            }
-        }
-
         stage('拉取被测代码') {
             steps {
                 echo '========== 拉取被测代码 =========='
