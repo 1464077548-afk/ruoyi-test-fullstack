@@ -57,6 +57,7 @@ pipeline {
                     bat '''
                         docker rm -f ruoyi-mysql ruoyi-redis ruoyi-admin ruoyi-ui ruoyi-test-runner 2>nul || exit /b 0
                         docker-compose down 2>nul || exit /b 0
+                        docker volume prune -f 2>nul || exit /b 0
                     '''
 
                     bat '''
@@ -65,12 +66,67 @@ pipeline {
                         set DB_PORT=3307
                         set ADMIN_PORT=8080
                         set UI_PORT=8081
-                        docker-compose up -d 2>&1 || exit /b 0
+                        docker-compose up -d 2>&1
                         echo 等待容器启动...
-                        timeout /t 120 /nobreak >nul || exit /b 0
+                        timeout /t 60 /nobreak >nul || exit /b 0
                         docker ps
-                        echo 等待服务健康检查...
-                        timeout /t 120 /nobreak >nul || exit /b 0
+                    '''
+
+                    bat '''
+                        echo 检查MySQL容器状态...
+                        for /l %%i in (1,1,10) do (
+                            docker exec ruoyi-mysql mysqladmin ping -h localhost -u root -p123456 2>nul && (
+                                echo MySQL已就绪
+                                goto mysql_ready
+                            )
+                            echo 等待MySQL... %%i/10
+                            timeout /t 10 /nobreak >nul || exit /b 0
+                        )
+                        :mysql_ready
+                        echo MySQL健康检查通过
+                    '''
+
+                    bat '''
+                        echo 检查Redis容器状态...
+                        for /l %%i in (1,1,10) do (
+                            docker exec ruoyi-redis redis-cli ping 2>nul | findstr /i "PONG" && (
+                                echo Redis已就绪
+                                goto redis_ready
+                            )
+                            echo 等待Redis... %%i/10
+                            timeout /t 5 /nobreak >nul || exit /b 0
+                        )
+                        :redis_ready
+                        echo Redis健康检查通过
+                    '''
+
+                    bat '''
+                        echo 检查ruoyi-admin服务状态...
+                        for /l %%i in (1,1,20) do (
+                            curl -s -o nul -w "%%{http_code}" http://localhost:8080/ 2>nul | findstr "200" && (
+                                echo ruoyi-admin已就绪
+                                goto admin_ready
+                            )
+                            echo 等待ruoyi-admin... %%i/20
+                            timeout /t 15 /nobreak >nul || exit /b 0
+                        )
+                        :admin_ready
+                        echo ruoyi-admin健康检查通过
+                    '''
+
+                    bat '''
+                        echo 检查ruoyi-ui服务状态...
+                        for /l %%i in (1,1,10) do (
+                            curl -s -o nul -w "%%{http_code}" http://localhost:8081/ 2>nul | findstr "200" && (
+                                echo ruoyi-ui已就绪
+                                goto ui_ready
+                            )
+                            echo 等待ruoyi-ui... %%i/10
+                            timeout /t 10 /nobreak >nul || exit /b 0
+                        )
+                        :ui_ready
+                        echo ruoyi-ui健康检查通过
+                        docker ps
                     '''
                 }
             }
@@ -83,14 +139,16 @@ pipeline {
                     if exist venv rmdir /s /q venv
                     python -m venv venv
                     venv\\Scripts\\python.exe -m pip install --upgrade pip
-                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures py
+                    venv\\Scripts\\pip install pytest pytest-html allure-pytest pytest-xdist pytest-rerunfailures
                     venv\\Scripts\\pip install playwright requests pydantic pydantic-settings python-dotenv pymysql pyyaml
                     
+                    set PLAYWRIGHT_BROWSERS_PATH=0
+                    
                     if exist "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" (
-                        echo 检测到系统Chrome，跳过Playwright浏览器下载
-                        set PLAYWRIGHT_BROWSERS_PATH=0
+                        echo 检测到系统Chrome，安装Playwright驱动
+                        venv\\Scripts\\playwright install --with-deps chromium
                     ) else (
-                        echo 未检测到系统Chrome，尝试下载Playwright Chromium
+                        echo 未检测到系统Chrome，下载完整的Playwright Chromium
                         venv\\Scripts\\playwright install chromium
                     )
                 '''

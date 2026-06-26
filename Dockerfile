@@ -4,15 +4,11 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     curl \
-    locales \
     && rm -rf /var/lib/apt/lists/*
 
-RUN locale-gen zh_CN.UTF-8 && \
-    update-locale LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8
-
-ENV LANG=zh_CN.UTF-8
-ENV LC_ALL=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV LANGUAGE=C.UTF-8
 
 COPY requirements.txt .
 
