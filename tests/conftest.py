@@ -840,71 +840,13 @@ def pytest_collection_modifyitems(config, items):
     worker_id = os.environ.get('PYTEST_XDIST_WORKER')
     
     if worker_id:
-        # 并行模式下不调整顺序，由调度器处理
         pass
     else:
-        # 非并行模式下，确保serial标记的测试先执行
         serial_tests = [item for item in items if 'serial' in item.keywords]
         other_tests = [item for item in items if 'serial' not in item.keywords]
         
         if serial_tests:
             items[:] = serial_tests + other_tests
-
-
-def pytest_xdist_make_scheduler(config, log):
-    """自定义测试调度器，确保serial标记的测试用例串行执行（仅在xdist插件可用时生效）"""
-    # 检查xdist插件是否可用
-    if not config.pluginmanager.hasplugin('xdist'):
-        return None  # 返回None表示使用默认调度器
-    
-    from xdist.scheduler import LoadScopeScheduling
-    
-    class SerialFirstScheduling(LoadScopeScheduling):
-        def _split_scope(self, nodeid):
-            if nodeid.endswith('::test_') or '::test_' in nodeid:
-                parts = nodeid.split('::')
-                if len(parts) >= 3:
-                    test_name = parts[-1]
-                    test_file = parts[-2] if parts[-2].endswith('.py') else parts[-3]
-                    
-                    import importlib.util
-                    import os
-                    test_path = os.path.join(config.rootdir, test_file)
-                    if os.path.exists(test_path):
-                        spec = importlib.util.spec_from_file_location("test_module", test_path)
-                        if spec and spec.loader:
-                            try:
-                                test_module = importlib.util.module_from_spec(spec)
-                                spec.loader.exec_module(test_module)
-                                if hasattr(test_module, test_name):
-                                    test_func = getattr(test_module, test_name)
-                                    if hasattr(test_func, 'pytestmark'):
-                                        for mark in test_func.pytestmark:
-                                            if mark.name == 'serial':
-                                                return f"serial_{nodeid}"
-                            except Exception:
-                                pass
-                return super()._split_scope(nodeid)
-            return super()._split_scope(nodeid)
-    
-    return SerialFirstScheduling(config, log)
-
-
-def pytest_xdist_auto_num_workers(config):
-    """自动设置worker数量（仅在xdist插件可用时生效）"""
-    import multiprocessing
-    import sys
-    
-    # 检查xdist插件是否可用
-    if not config.pluginmanager.hasplugin('xdist'):
-        return None  # 返回None表示使用默认worker数量
-    
-    # Windows下限制worker数量，避免进程池问题
-    if sys.platform.startswith('win'):
-        # Windows下使用spawn模式，开销较大，限制最大4个worker
-        return max(1, min(multiprocessing.cpu_count(), 4))
-    else:
-        return max(1, min(multiprocessing.cpu_count(), 8))
 
 
 def pytest_configure(config):

@@ -74,8 +74,11 @@ class LoginBiz():
                 self.login_page.fill_password(login_password)
                 print("✅ 密码填写完成")
                 
-                self.login_page.fill_captcha('skip_captcha')
-                print("✅ 验证码填写完成")
+                if self.login_page.is_visible(self.login_page.CAPTCHA_INPUT, timeout=3000):
+                    self.login_page.fill_captcha('skip_captcha')
+                    print("✅ 验证码填写完成")
+                else:
+                    print("ℹ️ 验证码输入框不可见，跳过填写")
                 
                 if is_rember_me:
                     self.check_remember_me()

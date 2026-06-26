@@ -1,34 +1,60 @@
-# 多环境配置
-
 environments:
-  # 开发环境
   development:
-    base_url: http://localhost:8080
+    base_url: http://localhost:8081
+    api_base_url: http://localhost:8080
     username: admin
     password: admin123
     browser: chromium
-    headless: true
-  
-  # 测试环境
+    headless: false
+    db_host: localhost
+    db_port: 3307
+    db_name: ry-vue
+    db_username: root
+    db_password: 123456
+    redis_host: localhost
+    redis_port: 6379
+
   testing:
-    base_url: http://test.ruoyi.com
+    base_url: http://test.ruoyi.com:8081
+    api_base_url: http://test.ruoyi.com:8080
     username: admin
     password: admin123
     browser: chromium
     headless: true
-  
-  # 预生产环境
+    db_host: test-mysql.ruoyi.com
+    db_port: 3306
+    db_name: ry-vue-test
+    db_username: test_user
+    db_password: test_password
+    redis_host: test-redis.ruoyi.com
+    redis_port: 6379
+
   preproduction:
-    base_url: http://preprod.ruoyi.com
+    base_url: http://preprod.ruoyi.com:8081
+    api_base_url: http://preprod.ruoyi.com:8080
     username: pre_admin
     password: pre_admin123
     browser: chromium
     headless: true
-  
-  # 生产环境
+    db_host: preprod-mysql.ruoyi.com
+    db_port: 3306
+    db_name: ry-vue-preprod
+    db_username: preprod_user
+    db_password: preprod_password
+    redis_host: preprod-redis.ruoyi.com
+    redis_port: 6379
+
   production:
-    base_url: http://prod.ruoyi.com
+    base_url: http://prod.ruoyi.com:8081
+    api_base_url: http://prod.ruoyi.com:8080
     username: prod_admin
     password: prod_admin123
     browser: chromium
     headless: true
+    db_host: prod-mysql.ruoyi.com
+    db_port: 3306
+    db_name: ry-vue-prod
+    db_username: prod_user
+    db_password: prod_password
+    redis_host: prod-redis.ruoyi.com
+    redis_port: 6379

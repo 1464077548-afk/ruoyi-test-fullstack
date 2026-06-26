@@ -22,7 +22,8 @@ class TestNetworkConditions:
         # 填写登录信息
         base_page.fill("login.username_input", settings.USERNAME)
         base_page.fill("login.password_input", settings.PASSWORD)
-        base_page.fill("login.captcha_input", "skip_captcha")
+        if base_page.is_visible("login.captcha_input", timeout=3000):
+            base_page.fill("login.captcha_input", "skip_captcha")
         
         # 点击登录
         base_page.click("login.submit_button")

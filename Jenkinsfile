@@ -7,6 +7,7 @@ pipeline {
         TEST_DIR = 'ruoyi-test-fullstack'
         TARGET_DIR = 'RuoYi-Vue'
         EMAIL_RECIPIENT = 'hejianping911@163.com'
+        TEST_ENV = 'development'
     }
 
     triggers {
@@ -173,11 +174,8 @@ pipeline {
                             if not exist "reports\\allure-results" mkdir reports\\allure-results
                             if not exist "reports\\html" mkdir reports\\html
 
-                            rem 设置测试环境变量
-                            set API_BASE_URL=http://localhost:8080
-                            set BASE_URL=http://localhost:8081
-                            set TEST_USERNAME=admin
-                            set TEST_PASSWORD=admin123
+                            rem 设置测试环境（development/testing/preproduction/production）
+                            set TEST_ENV=development
 
                             rem 设置Playwright使用系统Chrome
                             set PLAYWRIGHT_BROWSERS_PATH=0
