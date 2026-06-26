@@ -145,7 +145,8 @@ pipeline {
                     set PLAYWRIGHT_BROWSERS_PATH=0
                     
                     if exist "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" (
-                        echo 检测到系统Chrome，跳过浏览器下载，直接验证Playwright导入
+                        echo 检测到系统Chrome，跳过浏览器下载
+                        venv\\Scripts\\playwright install ffmpeg 2>&1 || echo ffmpeg安装失败，继续执行
                         venv\\Scripts\\python -c "from playwright.sync_api import sync_playwright; print('Playwright imported successfully')" 2>&1 || (
                             echo Playwright导入失败，尝试安装驱动...
                             venv\\Scripts\\playwright install chromium --force 2>&1 || echo 驱动安装失败，将使用系统Chrome尝试运行
@@ -153,6 +154,7 @@ pipeline {
                     ) else (
                         echo 未检测到系统Chrome，尝试下载Playwright Chromium（最多重试3次）
                         venv\\Scripts\\playwright install chromium 2>&1 || venv\\Scripts\\playwright install chromium 2>&1 || venv\\Scripts\\playwright install chromium 2>&1
+                        venv\\Scripts\\playwright install ffmpeg 2>&1 || echo ffmpeg安装失败，继续执行
                     )
                 '''
             }
